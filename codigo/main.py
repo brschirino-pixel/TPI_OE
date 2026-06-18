@@ -1,12 +1,12 @@
 from openpyxl import load_workbook
 from datetime import datetime
 
-
-ARCHIVO_EXCEL = "../base_datos/empleados.xlsx"
+ARCHIVO_EMPLEADOS = "../base_datos/empleados.xlsx"
+ARCHIVO_SOLICITUDES = "../base_datos/solicitudes.xlsx"
 
 
 def buscar_empleado(legajo):
-    wb = load_workbook(ARCHIVO_EXCEL)
+    wb = load_workbook(ARCHIVO_EMPLEADOS)
     hoja = wb.active
 
     for fila in hoja.iter_rows(min_row=2):
@@ -15,6 +15,7 @@ def buscar_empleado(legajo):
 
             return {
                 "fila": fila[0].row,
+                "legajo": fila[0].value,
                 "nombre": fila[1].value,
                 "sector": fila[2].value,
                 "dias": int(fila[3].value),
@@ -57,7 +58,7 @@ def solicitar_legajo():
         if empleado:
             return empleado
 
-        print("Error: legajo inexistente.")
+        print("Error: el legajo ingresado no existe.")
 
 
 def solicitar_fecha():
@@ -119,9 +120,14 @@ def solicitar_aprobacion_supervisor():
         )
 
 
-def actualizar_saldo(empleado, dias_solicitados):
+def actualizar_saldo(
+    empleado,
+    dias_solicitados
+):
 
-    saldo_actual = empleado["dias"] - dias_solicitados
+    saldo_actual = (
+        empleado["dias"] - dias_solicitados
+    )
 
     empleado["hoja"].cell(
         row=empleado["fila"],
@@ -129,7 +135,7 @@ def actualizar_saldo(empleado, dias_solicitados):
     ).value = saldo_actual
 
     empleado["workbook"].save(
-        ARCHIVO_EXCEL
+        ARCHIVO_EMPLEADOS
     )
 
     empleado["workbook"].close()
@@ -137,25 +143,67 @@ def actualizar_saldo(empleado, dias_solicitados):
     return saldo_actual
 
 
+def registrar_solicitud(
+    empleado,
+    fecha,
+    dias,
+    estado
+):
+
+    wb = load_workbook(
+        ARCHIVO_SOLICITUDES
+    )
+
+    hoja = wb.active
+
+    nuevo_id = hoja.max_row
+
+    hoja.append([
+        nuevo_id,
+        empleado["legajo"],
+        empleado["nombre"],
+        empleado["sector"],
+        fecha,
+        dias,
+        estado
+    ])
+
+    wb.save(
+        ARCHIVO_SOLICITUDES
+    )
+
+    wb.close()
+
+
 def generar_comprobante(
     empleado,
     fecha,
     dias,
     saldo_anterior,
-    saldo_actual
+    saldo_actual,
+    estado
 ):
 
-    print("\n")
-    print("=" * 50)
-    print("COMPROBANTE DE SOLICITUD DE VACACIONES")
+    print("\n" + "=" * 50)
+    print("COMPROBANTE DE SOLICITUD")
     print("=" * 50)
 
+    print(f"Legajo: {empleado['legajo']}")
     print(f"Empleado: {empleado['nombre']}")
     print(f"Sector: {empleado['sector']}")
-    print(f"Fecha de inicio: {fecha}")
+    print(f"Fecha inicio: {fecha}")
     print(f"Días solicitados: {dias}")
-    print(f"Saldo anterior: {saldo_anterior}")
-    print(f"Saldo actual: {saldo_actual}")
+    print(f"Estado: {estado}")
+
+    if estado == "Aprobada":
+
+        print(
+            f"Saldo anterior: {saldo_anterior}"
+        )
+
+        print(
+            f"Saldo actual: {saldo_actual}"
+        )
 
     print("=" * 50)
 
@@ -167,66 +215,90 @@ def main():
     print("GESTIÓN DE VACACIONES")
     print("=" * 50)
 
-    # ----------------------------------
     # Solicitar legajo
-    # ----------------------------------
 
     empleado = solicitar_legajo()
 
-    # ----------------------------------
-    # Mostrar información del empleado
-    # ----------------------------------
+    # Mostrar información
 
     print("\nInformación del empleado")
 
-    print(f"Nombre: {empleado['nombre']}")
-    print(f"Sector: {empleado['sector']}")
+    print(
+        f"Nombre: {empleado['nombre']}"
+    )
+
+    print(
+        f"Sector: {empleado['sector']}"
+    )
+
     print(
         f"Días disponibles: {empleado['dias']}"
     )
 
-    # ----------------------------------
     # Solicitar fecha
-    # ----------------------------------
 
     fecha = solicitar_fecha()
 
-    # ----------------------------------
-    # Solicitar cantidad de días
-    # ----------------------------------
+    # Solicitar cantidad
 
     dias_solicitados = solicitar_dias()
 
-    # ----------------------------------
-    # Consultar saldo disponible
-    # ----------------------------------
+    # Consultar saldo
 
     if dias_solicitados > empleado["dias"]:
 
-        print("\nSolicitud rechazada.")
+        registrar_solicitud(
+            empleado,
+            fecha,
+            dias_solicitados,
+            "Rechazada"
+        )
+
+        generar_comprobante(
+            empleado,
+            fecha,
+            dias_solicitados,
+            empleado["dias"],
+            empleado["dias"],
+            "Rechazada"
+        )
+
         print(
-            f"Días disponibles: {empleado['dias']}"
+            "\nSolicitud rechazada por saldo insuficiente."
         )
 
         empleado["workbook"].close()
         return
 
-    # ----------------------------------
     # Evaluar aprobación
-    # ----------------------------------
 
     if dias_solicitados > 10:
 
         print(
-            "\nLa solicitud debe ser revisada "
-            "por un supervisor."
+            "\nLa solicitud debe ser aprobada por un supervisor."
         )
 
-        aprobacion = (
+        respuesta = (
             solicitar_aprobacion_supervisor()
         )
 
-        if aprobacion == "N":
+        if respuesta == "N":
+
+            registrar_solicitud(
+                empleado,
+                fecha,
+                dias_solicitados,
+                "Rechazada"
+            )
+
+            generar_comprobante(
+                empleado,
+                fecha,
+                dias_solicitados,
+                empleado["dias"],
+                empleado["dias"],
+                "Rechazada"
+            )
 
             print(
                 "\nSolicitud rechazada por el supervisor."
@@ -235,20 +307,6 @@ def main():
             empleado["workbook"].close()
             return
 
-        print(
-            "\nSolicitud aprobada por el supervisor."
-        )
-
-    else:
-
-        print(
-            "\nSolicitud aprobada automáticamente."
-        )
-
-    # ----------------------------------
-    # Actualizar base de datos
-    # ----------------------------------
-
     saldo_anterior = empleado["dias"]
 
     saldo_actual = actualizar_saldo(
@@ -256,24 +314,24 @@ def main():
         dias_solicitados
     )
 
-    # ----------------------------------
-    # Generar comprobante
-    # ----------------------------------
+    registrar_solicitud(
+        empleado,
+        fecha,
+        dias_solicitados,
+        "Aprobada"
+    )
 
     generar_comprobante(
         empleado,
         fecha,
         dias_solicitados,
         saldo_anterior,
-        saldo_actual
+        saldo_actual,
+        "Aprobada"
     )
 
-    # ----------------------------------
-    # Confirmación final
-    # ----------------------------------
-
     print(
-        "\nLa solicitud fue registrada correctamente."
+        "\nSolicitud registrada correctamente."
     )
 
     print(

@@ -1,0 +1,15 @@
+Hoja: Solicitudes
+
+| ID | Legajo | Nombre     | Sector     | Fecha_Inicio | Dias_Solicitados | Estado   |
+| -- | ------ | ---------- | ---------- | ------------ | ---------------- | -------- |
+| 1  | 1001   | Juan Pérez | Desarrollo | 15/07/2026   | 5                | Aprobada |
+
+| Campo            | Descripción          |
+| ---------------- | -------------------- |
+| ID               | Número de solicitud  |
+| Legajo           | Legajo del empleado  |
+| Nombre           | Nombre del empleado  |
+| Sector           | Sector del empleado  |
+| Fecha_Inicio     | Fecha solicitada     |
+| Dias_Solicitados | Cantidad de días     |
+| Estado           | Aprobada o Rechazada |

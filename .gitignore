@@ -1,5 +1,28 @@
+# Archivos compilados de Python
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Entornos virtuales
 .venv/
 venv/
+env/
+
+# Variables de entorno
 .env
+
+# Configuración de VS Code
+.vscode/
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Caché de pruebas
+.pytest_cache/
+
+# Archivos de respaldo de Excel
+~$*.xlsx
