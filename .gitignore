@@ -1,28 +1,83 @@
-# Archivos compilados de Python
+# ============================================================
+# ARCHIVOS COMPILADOS DE PYTHON
+# ============================================================
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+*.pyd
 
-# Entornos virtuales
+# ============================================================
+# ENTORNOS VIRTUALES
+# ============================================================
 .venv/
 venv/
 env/
+ENV/
+env.bak/
+venv.bak/
 
-# Variables de entorno
+# ============================================================
+# VARIABLES DE ENTORNO
+# ============================================================
 .env
+.env.local
+.env.*.local
 
-# Configuración de VS Code
+# ============================================================
+# CONFIGURACIÓN DE EDITORES
+# ============================================================
+# VS Code
 .vscode/
+*.code-workspace
 
-# Archivos temporales
+# IDE de Python
+.idea/
+*.iml
+
+# ============================================================
+# ARCHIVOS TEMPORALES Y DE RESPALDO
+# ============================================================
 *.tmp
 *.log
+*.bak
+*.swp
+*~
 
-# Archivos del sistema operativo
+# ============================================================
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# ============================================================
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Caché de pruebas
-.pytest_cache/
-
-# Archivos de respaldo de Excel
+# ============================================================
+# ARCHIVOS DE EXCEL (RESPALDO Y TEMPORALES)
+# ============================================================
 ~$*.xlsx
+~$*.xls
+*.xlr
+
+# ============================================================
+# CACHÉ DE PRUEBAS Y REPORTES
+# ============================================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ============================================================
+# ARCHIVOS DE DEPENDENCIAS
+# ============================================================
+# Si se usa Poetry
+poetry.lock
+
+# Si se usa Pipenv
+Pipfile.lock
+
+# ============================================================
+# OTROS ARCHIVOS TEMPORALES
+# ============================================================
+*.zip
+*.tar.gz
+*.rar
