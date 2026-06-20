@@ -240,7 +240,7 @@ def solicitar_aprobacion_supervisor():
 # FUNCIONES DE PROCESAMIENTO DE DATOS
 # ============================================================
 
-def actualizar_saldo(empleado, dias_solicitados):
+def actualizar_dias(empleado, dias_solicitados):
     """
     Actualiza los días disponibles del empleado después de aprobar la solicitud.
     
@@ -249,22 +249,22 @@ def actualizar_saldo(empleado, dias_solicitados):
         dias_solicitados (int): Cantidad de días solicitados
         
     Returns:
-        int: Nuevo saldo de días disponibles
+        int: Nuevo total de días disponibles
     """
-    # Calcular el nuevo saldo (días disponibles - días solicitados)
-    saldo_actual = empleado["dias"] - dias_solicitados
+    # Calcular el nuevo total de días (días disponibles - días solicitados)
+    dias_actuales = empleado["dias"] - dias_solicitados
 
     # Actualizar la celda en Excel
     empleado["hoja"].cell(
         row=empleado["fila"],
         column=4  # Columna D = Días disponibles
-    ).value = saldo_actual
+    ).value = dias_actuales
 
     # Guardar los cambios en el archivo
     empleado["workbook"].save(ARCHIVO_EMPLEADOS)
     empleado["workbook"].close()
 
-    return saldo_actual
+    return dias_actuales
 
 
 def registrar_solicitud(empleado, fecha, dias, estado):
@@ -300,7 +300,7 @@ def registrar_solicitud(empleado, fecha, dias, estado):
     wb.close()
 
 
-def generar_comprobante(empleado, fecha, dias, saldo_anterior, saldo_actual, estado):
+def generar_comprobante(empleado, fecha, dias, dias_anteriores, dias_actuales, estado):
     """
     Genera un comprobante impreso con todos los detalles de la solicitud.
     
@@ -308,8 +308,8 @@ def generar_comprobante(empleado, fecha, dias, saldo_anterior, saldo_actual, est
         empleado (dict): Datos del empleado
         fecha (str): Fecha de inicio de vacaciones
         dias (int): Cantidad de días solicitados
-        saldo_anterior (int): Días disponibles antes de la solicitud
-        saldo_actual (int): Días disponibles después de la solicitud
+        dias_anteriores (int): Días disponibles antes de la solicitud
+        dias_actuales (int): Días disponibles después de la solicitud
         estado (str): 'Aprobada' o 'Rechazada'
     """
     # Encabezado del comprobante
@@ -325,10 +325,10 @@ def generar_comprobante(empleado, fecha, dias, saldo_anterior, saldo_actual, est
     print(f"Días solicitados: {dias}")
     print(f"Estado: {estado}")
 
-    # Si la solicitud fue aprobada, mostrar el saldo actualizado
+    # Si la solicitud fue aprobada, mostrar los días actualizados
     if estado == "Aprobada":
-        print(f"Días disponibles anteriores: {saldo_anterior}")
-        print(f"Días disponibles actuales: {saldo_actual}")
+        print(f"Días disponibles anteriores: {dias_anteriores}")
+        print(f"Días disponibles actuales: {dias_actuales}")
 
     # Pie del comprobante
     print("=" * 60)
@@ -481,11 +481,11 @@ def main():
     # ============================================================
     estado = "ACTUALIZANDO_DATOS"
 
-    # Guardar el saldo anterior para el comprobante
-    saldo_anterior = empleado["dias"]
+    # Guardar los días anterior para el comprobante
+    dias_anteriores = empleado["dias"]
 
     # Actualizar los días disponibles del empleado
-    saldo_actual = actualizar_saldo(
+    dias_actuales = actualizar_dias(
         empleado,
         dias_solicitados
     )
@@ -507,8 +507,8 @@ def main():
         empleado,
         fecha,
         dias_solicitados,
-        saldo_anterior,
-        saldo_actual,
+        dias_anteriores,
+        dias_actuales,
         "Aprobada"
     )
 
